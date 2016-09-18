@@ -4,22 +4,22 @@ open System
 open System.Text
 open Consul
 
-(** Unique idetifier for this service **)
+(** Unique identifier for this service **)
 let serviceGuid = Guid.NewGuid().ToString()
 
 (** Create a new ConsulClient - https://github.com/PlayFab/consuldotnet **)
 let consulClient = new ConsulClient()
 
-(** Nodes will contend over a common leadership key / value pair; the node that's able to obtain a lock on this key, becomes leader **)
-let leadershipKey = "leadershipkey15"
+(** Nodes will contend over a common leadership key / value pair; the node that's able to obtain a lock on this key, becomes the leader **)
+let leadershipKey = "leadershipkey"
 
-(** The consul session we'll use for setting and releasing locks **)
+(** The Consul session we'll use for setting and releasing locks **)
 let session = consulClient.Session.Create(new SessionEntry()) |> Async.AwaitTask |> Async.RunSynchronously 
 
 (** Checks to see if the current node is the leader **)
 let getLeaderGuid () = consulClient.KV.Get(leadershipKey) |> Async.AwaitTask |> Async.RunSynchronously |> fun myKv -> myKv.Response.Value |> Encoding.Default.GetString
 
-(** If there is a leadership election, all nodes attempt to lock 'leadershipKey'; if the response is true, the key has been sucessfully locked **)
+(** If there is a leadership election, all nodes attempt to lock 'leadershipKey'; if the response is true, the key has been successfully locked **)
 let tryBecomeLeader () =  
     
     (** Console **)
@@ -35,7 +35,7 @@ let tryBecomeLeader () =
     (** Did we acquire the lock? **)
     let result = consulClient.KV.Acquire(targetpair) |> Async.AwaitTask |> Async.RunSynchronously 
     
-    (** Print result of election **)
+    (** Print the result of the election **)
     match result.Response with 
     | true  -> Console.WriteLine("I succeeded :o)")
     | false -> Console.WriteLine("I failed :o(")  
@@ -97,10 +97,10 @@ let watchLeadershipState () = async {
     leadershipLoop ( Convert.ToUInt64 0 ) 
  }
 
- (** If we're the leader, we're going to create a random failiure in this service **)
+(** If we're the leader, we're going to create a random failure in this service **)
 let randomFailiure () = 
     
-    (** If we're the leader, wait for a failiure **)
+    (** If we're the leader, wait for a failure **)
     let rec failiureLoop () = 
          async { do! Async.Sleep (5000) } |> Async.RunSynchronously
          let leaderGuid = getLeaderGuid ()
@@ -125,7 +125,7 @@ try
     (** Launch node **)
     watchLeadershipState () |> Async.Start
   
-    (** Kick off our random failiure thread **)
+    (** Kick off our random failure  thread **)
     randomFailiure ()
 
 with | ex -> stepDown ()
