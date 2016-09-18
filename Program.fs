@@ -11,7 +11,7 @@ let serviceGuid = Guid.NewGuid().ToString()
 let consulClient = new ConsulClient()
 
 (** Nodes will contend over a common leadership key / value pair; the node that's able to obtain a lock on this key, becomes the leader **)
-let leadershipKey = "leadershipkey"
+let leadershipKey = "leaderkey"
 
 (** The Consul session we'll use for setting and releasing locks **)
 let session = consulClient.Session.Create(new SessionEntry()) |> Async.AwaitTask |> Async.RunSynchronously 
