@@ -1,4 +1,6 @@
-﻿(*** Leadership election with Hashicorp Consul in F# ***)
+﻿//
+// Leadership election with Hashicorp Consul in F# 
+//
 
 open System
 open System.Text
@@ -129,4 +131,3 @@ try
     randomFailiure ()
 
 with | ex -> stepDown ()
-   
